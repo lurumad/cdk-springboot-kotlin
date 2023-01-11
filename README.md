@@ -1,2 +1,3 @@
-# cdk-springboot-kotlin
-An example of application using AWS CDK + SpringBoot + Kotlin
+# To-Do app
+
+Yet another To-Do app using Github Actions + AWS CDK + Spring Boot + Kotlin
