@@ -29,7 +29,7 @@ jobs:
           npm run build
       - name: CDK Deploy
         run:
-          REGION=${{ env.AWS_REGION }} AWS_ACCOUNT_ID=${{ AWS_ACCOUNT_ID }} ENVIRONMENT=${{ ENVIRONMENT }} npx cdk deploy --require-approval never --outputs-file ./cdk-outputs.json
+          REGION=${{ env.AWS_REGION }} AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }} ENVIRONMENT=${{ env.ENVIRONMENT }} npx cdk deploy --require-approval never --outputs-file ./cdk-outputs.json
 
         
       
