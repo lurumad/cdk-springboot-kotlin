@@ -2,6 +2,7 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { AlbStack } from '../lib/alb/alb-stack';
+import { AutoScaleStack } from '../lib/autoscale/auto-scale-stack';
 import { EcrStack } from '../lib/ecr/ecr-stack';
 import { FargateStack } from '../lib/fargate/fargate-stack';
 import { VpcStack } from '../lib/vpc/vpc-stack';
@@ -42,11 +43,20 @@ const fargateStack = new FargateStack(app, `todos-fargate-stack-${suffix}`, {
     imageTag: process.env.IMAGE_TAG || null,
 });
 
-new AlbStack(app, `todos-alb-stack-${suffix}`, {
+const albStack = new AlbStack(app, `todos-alb-stack-${suffix}`, {
     env: { account: accountId, region: region },
     suffix: suffix,
     vpc: vpcStack.vpc,
     service: fargateStack.service,
+});
+
+new AutoScaleStack(app, `todos-autoscale-stack-${suffix}`, {
+    env: { account: accountId, region: region },
+    suffix: suffix,
+    cluster: fargateStack.cluster,
+    service: fargateStack.service,
+    loadBalancer: albStack.applicationLoadBalancer,
+    targetGroup: albStack.targetGroup,
 });
 
 app.synth();

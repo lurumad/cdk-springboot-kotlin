@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import { Ec2Action } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
@@ -12,12 +13,13 @@ interface FargateStackProps extends cdk.StackProps {
 }
 
 export class FargateStack extends cdk.Stack {
+    public cluster: ecs.Cluster;
     public service: ecs.FargateService;
 
     constructor(scope: Construct, id: string, props: FargateStackProps) {
         super(scope, id, props);
 
-        const cluster = new ecs.Cluster(this, 'cluster', { vpc: props.vpc });
+        this.cluster = new ecs.Cluster(this, 'cluster', { vpc: props.vpc });
 
         const taskDefinition = new ecs.FargateTaskDefinition(this, 'taskDefinition', {
             memoryLimitMiB: 512,
@@ -37,7 +39,7 @@ export class FargateStack extends cdk.Stack {
         });
 
         this.service = new ecs.FargateService(this, 'fargate', {
-            cluster: cluster,
+            cluster: this.cluster,
             serviceName: `ecs${props.suffix}`,
             desiredCount: 1,
             taskDefinition: taskDefinition,
