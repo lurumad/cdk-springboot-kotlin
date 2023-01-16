@@ -1,8 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
-import { Ec2Action } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 
 interface FargateStackProps extends cdk.StackProps {
@@ -21,9 +22,49 @@ export class FargateStack extends cdk.Stack {
 
         this.cluster = new ecs.Cluster(this, 'cluster', { vpc: props.vpc });
 
+        const serviceLogGroup = new logs.LogGroup(this, 'ServiceLogGroup', {
+            logGroupName: `ServiceLogs-${props.suffix}`,
+            retention: logs.RetentionDays.EIGHTEEN_MONTHS,
+        });
+
+        const logging = ecs.LogDriver.awsLogs({
+            streamPrefix: `${props.suffix}`,
+            logGroup: serviceLogGroup,
+        });
+
+        const taskRole = new iam.Role(this, 'EcsTaskExecutionRole', {
+            assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+            managedPolicies: [iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy')],
+            inlinePolicies: {
+                Telemetry: new iam.PolicyDocument({
+                    statements: [
+                        new iam.PolicyStatement({
+                            effect: iam.Effect.ALLOW,
+                            actions: [
+                                'logs:PutLogEvents',
+                                'logs:CreateLogGroup',
+                                'logs:CreateLogStream',
+                                'logs:DescribeLogStreams',
+                                'logs:DescribeLogGroups',
+                                'cloudwatch:PutMetricData',
+                                'xray:PutTraceSegments',
+                                'xray:PutTelemetryRecords',
+                                'xray:GetSamplingRules',
+                                'xray:GetSamplingTargets',
+                                'xray:GetSamplingStatisticSummaries',
+                            ],
+                            resources: ['*'],
+                        }),
+                    ],
+                }),
+            },
+        });
+
         const taskDefinition = new ecs.FargateTaskDefinition(this, 'taskDefinition', {
             memoryLimitMiB: 512,
             cpu: 256,
+            taskRole,
+            executionRole: taskRole,
         });
 
         const image = props.imageTag ?
@@ -32,6 +73,7 @@ export class FargateStack extends cdk.Stack {
 
         const container = taskDefinition.addContainer('web', {
             image: image,
+            logging,
         });
 
         container.addPortMappings({
@@ -44,6 +86,10 @@ export class FargateStack extends cdk.Stack {
             desiredCount: 1,
             taskDefinition: taskDefinition,
             assignPublicIp: false,
+            circuitBreaker: {
+                rollback: true,
+            },
+            minHealthyPercent: 100,
         });
     }
 }
