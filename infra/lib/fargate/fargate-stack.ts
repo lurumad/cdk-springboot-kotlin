@@ -88,9 +88,6 @@ export class FargateStack extends cdk.Stack {
             desiredCount: 1,
             taskDefinition: taskDefinition,
             assignPublicIp: false,
-            circuitBreaker: {
-                rollback: true,
-            },
             minHealthyPercent: 100,
             deploymentController: {
                 type: ecs.DeploymentControllerType.CODE_DEPLOY,
