@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
+import * as elb from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
@@ -10,6 +11,7 @@ interface FargateStackProps extends cdk.StackProps {
     suffix: string;
     ecr: ecr.Repository;
     vpc: ec2.Vpc;
+    blueTargetGroup: elb.ApplicationTargetGroup;
     imageTag: String | null;
 }
 
@@ -77,7 +79,7 @@ export class FargateStack extends cdk.Stack {
         });
 
         container.addPortMappings({
-            containerPort: 80,
+            containerPort: 8080,
         });
 
         this.service = new ecs.FargateService(this, 'fargate', {
@@ -91,5 +93,7 @@ export class FargateStack extends cdk.Stack {
             },
             minHealthyPercent: 100,
         });
+
+        props.blueTargetGroup.addTarget(this.service);
     }
 }
