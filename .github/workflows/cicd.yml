@@ -24,12 +24,9 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
-      - name: Install dependencies
-        run:
-          cd infra && npm install
       - name: CDK Build
         run:
           cd infra && npm ci && npm run build
       - name: CDK Deploy
         run:
-          cd infra && REGION=${{ env.AWS_REGION }} AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }} ENVIRONMENT=${{ env.ENVIRONMENT }} npx cdk deploy /infra --require-approval never --outputs-file ./cdk-outputs.json
+          cd infra && REGION=${{ env.AWS_REGION }} ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }} ENVIRONMENT=${{ env.ENVIRONMENT }} npx cdk deploy /infra --require-approval never --outputs-file ./cdk-outputs.json
