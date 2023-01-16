@@ -26,17 +26,14 @@ jobs:
           node-version: "16"
       - name: Install dependencies
         run:
+          cd infra
           npm install
-        with: 
-          working-directory: ./infra
       - name: CDK Build
         run:
+          cd infra
           npm ci
           npm run build
-        with: 
-          working-directory: ./infra
       - name: CDK Deploy
         run:
+          cd infra
           REGION=${{ env.AWS_REGION }} AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }} ENVIRONMENT=${{ env.ENVIRONMENT }} npx cdk deploy /infra --require-approval never --outputs-file ./cdk-outputs.json
-        with: 
-          working-directory: ./infra
