@@ -92,6 +92,9 @@ export class FargateStack extends cdk.Stack {
                 rollback: true,
             },
             minHealthyPercent: 100,
+            deploymentController: {
+                type: ecs.DeploymentControllerType.CODE_DEPLOY,
+            },
         });
 
         props.blueTargetGroup.addTarget(this.service);
