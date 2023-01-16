@@ -5,9 +5,10 @@ import * as ecs from 'aws-cdk-lib/aws-ecs';
 import { Construct } from 'constructs';
 
 interface FargateStackProps extends cdk.StackProps {
-    prefix: string;
+    suffix: string;
     ecr: ecr.Repository;
     vpc: ec2.Vpc;
+    imageTag: String | null;
 }
 
 export class FargateStack extends cdk.Stack {
@@ -23,8 +24,12 @@ export class FargateStack extends cdk.Stack {
             cpu: 256,
         });
 
+        const image = props.imageTag ?
+            ecs.ContainerImage.fromEcrRepository(props.ecr, 'latest') :
+            ecs.ContainerImage.fromRegistry('amazon/amazon-ecs-sample');
+
         const container = taskDefinition.addContainer('web', {
-            image: ecs.ContainerImage.fromEcrRepository(props.ecr, 'latest'),
+            image: image,
         });
 
         container.addPortMappings({
@@ -33,7 +38,7 @@ export class FargateStack extends cdk.Stack {
 
         this.service = new ecs.FargateService(this, 'fargate', {
             cluster: cluster,
-            serviceName: `ecs${props.prefix}`,
+            serviceName: `ecs${props.suffix}`,
             desiredCount: 1,
             taskDefinition: taskDefinition,
             assignPublicIp: false,

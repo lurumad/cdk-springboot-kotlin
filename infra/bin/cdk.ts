@@ -8,7 +8,7 @@ import { VpcStack } from '../lib/vpc/vpc-stack';
 
 const accountId = process.env.ACCOUNT_ID;
 const region = process.env.REGION;
-const prefix = process.env.ENVIRONMENT;
+const suffix = process.env.ENVIRONMENT;
 
 if (!accountId) {
     throw new Error('ACCOUNT_ID environment variable is not set');
@@ -18,32 +18,33 @@ if (!region) {
     throw new Error('REGION environment variable is not set');
 }
 
-if (!prefix) {
+if (!suffix) {
     throw new Error('ENVIRONMENT environment variable is not set');
 }
 
 const app = new cdk.App();
 
-const vpcStack = new VpcStack(app, `todos-vpc-stack-${prefix}`, {
+const vpcStack = new VpcStack(app, `todos-vpc-stack-${suffix}`, {
     env: { account: accountId, region: region },
-    prefix: prefix,
+    suffix: suffix,
 });
 
-const ecrStack = new EcrStack(app, `todos-ecr-stack-${prefix}`, {
+const ecrStack = new EcrStack(app, `todos-ecr-stack-${suffix}`, {
     env: { account: accountId, region: region },
-    prefix: prefix,
+    suffix: suffix,
 });
 
-const fargateStack = new FargateStack(app, `todos-fargate-stack-${prefix}`, {
+const fargateStack = new FargateStack(app, `todos-fargate-stack-${suffix}`, {
     env: { account: accountId, region: region },
-    prefix: prefix,
+    suffix: suffix,
     vpc: vpcStack.vpc,
     ecr: ecrStack.repository,
+    imageTag: process.env.IMAGE_TAG || null,
 });
 
-new AlbStack(app, `todos-alb-stack-${prefix}`, {
+new AlbStack(app, `todos-alb-stack-${suffix}`, {
     env: { account: accountId, region: region },
-    prefix: prefix,
+    suffix: suffix,
     vpc: vpcStack.vpc,
     service: fargateStack.service,
 });

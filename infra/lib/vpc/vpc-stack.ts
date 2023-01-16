@@ -3,7 +3,7 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
 interface VpcStackProps extends cdk.StackProps {
-    prefix: string;
+    suffix: string;
 }
 
 export class VpcStack extends cdk.Stack {
@@ -13,7 +13,7 @@ export class VpcStack extends cdk.Stack {
         super(scope, id, props);
 
         this.vpc = new ec2.Vpc(this, 'vpc', {
-            vpcName: `vpc${props.prefix}`,
+            vpcName: `vpc${props.suffix}`,
             maxAzs: 3,
         });
     }

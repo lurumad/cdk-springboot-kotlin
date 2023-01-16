@@ -5,7 +5,7 @@ import * as alb from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
 
 interface AlbStackProps extends cdk.StackProps {
-    prefix: string;
+    suffix: string;
     vpc: ec2.Vpc;
     service: ecs.FargateService;
 }
@@ -16,7 +16,7 @@ export class AlbStack extends cdk.Stack {
 
         const lb = new alb.ApplicationLoadBalancer(this, 'alb', {
             vpc: props.vpc,
-            loadBalancerName: `alb-${props.prefix}`,
+            loadBalancerName: `alb-${props.suffix}`,
         });
 
         const listener = lb.addListener('listener', {

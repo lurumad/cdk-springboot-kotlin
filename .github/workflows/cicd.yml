@@ -1,0 +1,35 @@
+name: Deployment workflow
+
+env:
+  AWS_REGION: us-east-1
+  ENVIRONMENT: dev
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  aws-cdk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: infra/
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: CDK Build
+        run:
+          npm ci
+          npm run build
+      - name: CDK Deploy
+        run:
+          REGION=${{ env.AWS_REGION }} AWS_ACCOUNT_ID=${{ AWS_ACCOUNT_ID }} ENVIRONMENT=${{ ENVIRONMENT }} npx cdk deploy --require-approval never --outputs-file ./cdk-outputs.json
+
+        
+      
