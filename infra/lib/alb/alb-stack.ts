@@ -29,7 +29,7 @@ export class AlbStack extends cdk.Stack {
             port: 80,
         });
 
-        this.prodTargetGroup = this.testListener.addTargets('Prod', {
+        this.prodTargetGroup = this.prodListener.addTargets('Prod', {
             protocol: elb.ApplicationProtocol.HTTP,
             protocolVersion: elb.ApplicationProtocolVersion.HTTP1,
             deregistrationDelay: cdk.Duration.seconds(60),
