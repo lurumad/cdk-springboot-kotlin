@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { AlbStack } from '../lib/alb/alb-stack';
+import { AlbStack as ElbStack } from '../lib/alb/alb-stack';
 import { AutoScaleStack } from '../lib/autoscale/auto-scale-stack';
 import { CloudWatchStack } from '../lib/cloudwatch/cloudwatch-stack';
 import { CodeDeployStack } from '../lib/codedeploy/codedeploy-stack';
@@ -37,7 +37,7 @@ const ecrStack = new EcrStack(app, `todos-ecr-stack-${suffix}`, {
     suffix: suffix,
 });
 
-const elbStack = new AlbStack(app, `todos-elb-stack-${suffix}`, {
+const elbStack = new ElbStack(app, `todos-elb-stack-${suffix}`, {
     env: { account: accountId, region: region },
     suffix: suffix,
     vpc: vpcStack.vpc,
