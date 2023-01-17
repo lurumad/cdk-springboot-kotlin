@@ -37,7 +37,7 @@ const ecrStack = new EcrStack(app, `todos-ecr-stack-${suffix}`, {
     suffix: suffix,
 });
 
-const elbStack = new AlbStack(app, `todos-alb-stack-${suffix}`, {
+const elbStack = new AlbStack(app, `todos-elb-stack-${suffix}`, {
     env: { account: accountId, region: region },
     suffix: suffix,
     vpc: vpcStack.vpc,
@@ -48,7 +48,7 @@ const fargateStack = new FargateStack(app, `todos-fargate-stack-${suffix}`, {
     suffix: suffix,
     vpc: vpcStack.vpc,
     ecr: ecrStack.repository,
-    blueTargetGroup: elbStack.prodTargetGroup,
+    prodTargetGroup: elbStack.prodTargetGroup,
     imageTag: process.env.IMAGE_TAG || null,
 });
 
@@ -64,8 +64,8 @@ new AutoScaleStack(app, `todos-autoscale-stack-${suffix}`, {
 const cloudWatchStack = new CloudWatchStack(app, `todos-cloudwatch-stack-${suffix}`, {
     env: { account: accountId, region: region },
     suffix: suffix,
-    blueTargetGroup: elbStack.prodTargetGroup,
-    greenTargetGroup: elbStack.testTargetGroup,
+    prodTargetGroup: elbStack.prodTargetGroup,
+    testTargetGroup: elbStack.testTargetGroup,
 });
 
 new CodeDeployStack(app, `todos-codedeploy-stack-${suffix}`, {

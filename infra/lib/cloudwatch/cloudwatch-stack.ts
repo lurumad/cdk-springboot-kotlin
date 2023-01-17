@@ -5,8 +5,8 @@ import { Construct } from 'constructs';
 
 interface CloudWatchStackProps extends cdk.StackProps {
     suffix: string;
-    blueTargetGroup: elb.ApplicationTargetGroup;
-    greenTargetGroup: elb.ApplicationTargetGroup;
+    prodTargetGroup: elb.ApplicationTargetGroup;
+    testTargetGroup: elb.ApplicationTargetGroup;
 }
 
 export class CloudWatchStack extends cdk.Stack {
@@ -17,20 +17,20 @@ export class CloudWatchStack extends cdk.Stack {
 
         const blueUnhealthyHosts = new cloudwatch.Alarm(this, 'BlueUnhealthyHosts', {
             alarmName: `Unhealthy-Hosts-Blue-${props.suffix}`,
-            metric: props.blueTargetGroup.metricUnhealthyHostCount(),
+            metric: props.prodTargetGroup.metricUnhealthyHostCount(),
             threshold: 1,
             evaluationPeriods: 2,
         });
         const greenUnhealthyHosts = new cloudwatch.Alarm(this, 'GreenUnhealthyHosts', {
             alarmName: `Unhealthy-Hosts-Green-${props.suffix}`,
-            metric: props.greenTargetGroup.metricUnhealthyHostCount(),
+            metric: props.testTargetGroup.metricUnhealthyHostCount(),
             threshold: 1,
             evaluationPeriods: 2,
         });
 
         const blueApiFailure = new cloudwatch.Alarm(this, 'Blue5xx', {
             alarmName: `Http-5xx-Blue-${props.suffix}`,
-            metric: props.blueTargetGroup.metricHttpCodeTarget(
+            metric: props.prodTargetGroup.metricHttpCodeTarget(
                 elb.HttpCodeTarget.TARGET_5XX_COUNT,
                 { period: cdk.Duration.minutes(1) },
             ),
@@ -39,7 +39,7 @@ export class CloudWatchStack extends cdk.Stack {
         });
         const greenApiFailure = new cloudwatch.Alarm(this, 'Green5xx', {
             alarmName: `Http-5xx-Green-${props.suffix}`,
-            metric: props.greenTargetGroup.metricHttpCodeTarget(
+            metric: props.testTargetGroup.metricHttpCodeTarget(
                 elb.HttpCodeTarget.TARGET_5XX_COUNT,
                 { period: cdk.Duration.minutes(1) },
             ),

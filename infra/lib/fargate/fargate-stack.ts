@@ -11,7 +11,7 @@ interface FargateStackProps extends cdk.StackProps {
     suffix: string;
     ecr: ecr.Repository;
     vpc: ec2.Vpc;
-    blueTargetGroup: elb.ApplicationTargetGroup;
+    prodTargetGroup: elb.ApplicationTargetGroup;
     imageTag: String | null;
 }
 
@@ -94,6 +94,6 @@ export class FargateStack extends cdk.Stack {
             },
         });
 
-        props.blueTargetGroup.addTarget(this.service);
+        props.prodTargetGroup.addTarget(this.service);
     }
 }
